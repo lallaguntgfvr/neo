@@ -1,0 +1,57 @@
+# ---------------------------------------------------------------------------
+# Deploys this repository to Neocities on every push to main.
+#
+# TO ENABLE:  copy this file to  .github/workflows/deploy-neocities.yml
+# (it lives in deploy/ rather than .github/workflows/ because automated
+#  agents without the `workflows` GitHub permission cannot create that path —
+#  a person clicking "Add file" in the GitHub web editor can.)
+#
+# One-time setup:
+#   1. Get your site's API key:  https://neocities.org/settings/YOUR-SITE#api_key
+#   2. In GitHub: Settings > Secrets and variables > Actions > New repository
+#      secret. Name it  NEOCITIES_API_TOKEN  and paste the key as the value.
+#   3. Push to main (or run this workflow manually from the Actions tab).
+#
+# Nothing in this file is secret — the key lives only in the repository secret.
+# ---------------------------------------------------------------------------
+name: Deploy to Neocities
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Copy only the files a browser needs into _site/, so nothing like .git
+      # or this workflow itself ends up on your Neocities account.
+      - name: Stage static files
+        run: |
+          mkdir -p _site
+          rsync -a --delete \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude '.tools' \
+            --exclude 'deploy' \
+            --exclude 'node_modules' \
+            --exclude 'README.md' \
+            --exclude '.gitignore' \
+            --exclude 'package.json' \
+            --exclude 'package-lock.json' \
+            ./ _site/
+
+      - name: Deploy to Neocities
+        uses: bcomnes/deploy-to-neocities@v3
+        with:
+          api_key: ${{ secrets.NEOCITIES_API_TOKEN }}
+          dist_dir: _site
+          # Set to true to also delete files on Neocities that no longer exist
+          # here. Keep it false until you are sure — there is no undo.
+          cleanup: false
+          neocities_supporter: false
+          preview_before_deploy: true
