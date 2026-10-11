@@ -1,22 +1,24 @@
 /* ==========================================================================
-   NOVA STATION — script.js
+   NEAPOLITAN STATION — script.js
    --------------------------------------------------------------------------
    One plain <script>, no dependencies, no build step, no network calls.
-   Everything here is progressive: switch JS off and the page still reads fine.
+   Everything is progressive: turn JavaScript off and the page still reads,
+   the widgets just keep their starting values.
 
    Contents:
-     1. tiny helpers                        2. clock + copyright year
-     3. CRT scanline toggle                 4. status.exe bubble
-     5. fake music player                   6. guestbook (localStorage)
-     7. hit counter                         8. scroll reveal
-     9. sticky-nav highlighting            10. easter eggs
+      1. helpers               2. station clock + mini calendar
+      3. live transmission     4. status + meters
+      5. currently-playing     6. colour palette
+      7. to-do list            8. cat of the day
+      9. guestbook            10. visit counter
+     11. confetti
    ========================================================================== */
 
 /* 1. HELPERS -------------------------------------------------------------- */
 const $  = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-/* localStorage can throw in private modes / sandboxed iframes — wrap it */
+/* localStorage throws in private modes and some sandboxed frames */
 const store = {
   get(key, fallback = null) {
     try {
@@ -37,182 +39,373 @@ const store = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  clock();
-  copyrightYear();
-  crtToggle();
-  statusBubble();
-  musicPlayer();
+  stationClock();
+  miniCalendar();
+  transmission();
+  statusWidget();
+  player();
+  palette();
+  todoList();
+  catOfTheDay();
   guestbook();
-  hitCounter();
-  scrollReveal();
-  activeNav();
-  easterEggs();
+  visitCounter();
+  confetti();
 });
 
-/* 2. CLOCK + COPYRIGHT YEAR ----------------------------------------------- */
-function clock() {
-  const el = $('#clock');
-  if (!el) return;
+/* 2. STATION CLOCK + MINI CALENDAR --------------------------------------- */
+function stationClock() {
+  const time = $('#clock');
+  const date = $('#clock-date');
+  if (!time) return;
+
+  const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june',
+    'july', 'august', 'september', 'october', 'november', 'december'];
+  const DAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
   const tick = () => {
     const now = new Date();
     const pad = (n) => String(n).padStart(2, '0');
     let hours = now.getHours();
-    const suffix = hours >= 12 ? 'PM' : 'AM';
+    const suffix = hours >= 12 ? 'pm' : 'am';
     hours = hours % 12 || 12;
-    el.textContent = `${pad(hours)}:${pad(now.getMinutes())}:${pad(now.getSeconds())} ${suffix}`;
+    time.textContent = `${pad(hours)}:${pad(now.getMinutes())}:${pad(now.getSeconds())} ${suffix}`;
+    if (date) {
+      date.textContent = `${DAYS[now.getDay()]}, ${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
+    }
   };
 
   tick();
   window.setInterval(tick, 1000);
 }
 
-function copyrightYear() {
-  const el = $('#year');
-  if (el) el.textContent = String(new Date().getFullYear());
+function miniCalendar() {
+  const head = $('#cal-month');
+  const body = $('#cal-body');
+  if (!body) return;
+
+  const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june',
+    'july', 'august', 'september', 'october', 'november', 'december'];
+
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const today = now.getDate();
+  const firstWeekday = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  if (head) head.textContent = `${MONTHS[month]} ${year}`;
+
+  body.innerHTML = '';
+  let row = document.createElement('tr');
+
+  for (let i = 0; i < firstWeekday; i += 1) {
+    const cell = document.createElement('td');
+    cell.className = 'is-blank';
+    cell.textContent = '·';
+    row.appendChild(cell);
+  }
+
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    if (row.children.length === 7) {
+      body.appendChild(row);
+      row = document.createElement('tr');
+    }
+    const cell = document.createElement('td');
+    cell.textContent = String(day);
+    if (day === today) {
+      cell.className = 'is-today';
+      cell.setAttribute('aria-current', 'date');
+    }
+    row.appendChild(cell);
+  }
+
+  while (row.children.length < 7) {
+    const cell = document.createElement('td');
+    cell.className = 'is-blank';
+    cell.textContent = '·';
+    row.appendChild(cell);
+  }
+  body.appendChild(row);
 }
 
-/* 3. CRT SCANLINE TOGGLE -------------------------------------------------- */
-function crtToggle() {
-  const btn = $('#crt-toggle');
-  if (!btn) return;
-
-  const apply = (on) => {
-    document.body.classList.toggle('crt-off', !on);
-    btn.textContent = on ? 'CRT: ON' : 'CRT: OFF';
-    btn.setAttribute('aria-pressed', String(on));
-    store.set('nova.crt', on);          // remembered for the next visit
-  };
-
-  apply(store.get('nova.crt', true) !== false);
-
-  btn.addEventListener('click', () => apply(document.body.classList.contains('crt-off')));
-}
-
-/* 4. STATUS.EXE BUBBLE ---------------------------------------------------- */
-const MOODS = [
-  'currently: drinking cold coffee and redrawing a cat',
-  'mood: 56k modem noise, but happy',
-  'listening to the fan on my old tower spin up',
-  'thinking about how good the GeoCities archive is',
-  'status: writing HTML like it is 1999 and that is fine',
-  'feeling: a website nobody asked for, made anyway',
-  'watching the hit counter like it is a stock ticker',
-  'currently: yes, this is the whole hobby',
-  'mood: neon-coloured and slightly off-centre',
-  'thinking about adding a webring. always.',
-  'status: pixels placed with zero professional training'
+/* 3. LIVE TRANSMISSION --------------------------------------------------- */
+const TRANSMISSIONS = [
+  'baking something pink, back in a minute…',
+  'currently rendering: one (1) hyperlink',
+  'the wallpaper took longer than the whole page',
+  'someone signed the guestbook today. this is the news.',
+  'thinking about adding a webring page. always.',
+  'listening to the kettle instead of music',
+  'spot the cat in the gallery. she is asleep.',
+  'no cookies were set in the making of this website',
+  'rewriting the same paragraph for the fourth time',
+  'the buttons page is my favourite part. go look.'
 ];
 
-function statusBubble() {
+function transmission() {
+  const text = $('#transmission');
+  const btn = $('#tx-btn');
+  if (!text) return;
+
+  let index = 0;
+  const show = (i) => {
+    text.textContent = TRANSMISSIONS[i];
+    text.classList.remove('is-new');
+    void text.offsetWidth;
+    text.classList.add('is-new');
+  };
+
+  show(index);
+  if (btn) {
+    btn.addEventListener('click', () => {
+      index = (index + 1) % TRANSMISSIONS.length;
+      show(index);
+    });
+  }
+}
+
+/* 4. STATUS + METERS ----------------------------------------------------- */
+const MOODS = [
+  'drinking the fourth coffee and redrawing a cat',
+  'mood: warm, slightly crumpled, very online',
+  'rearranging the same six colours again',
+  'wondering who invented the marquee and whether they are okay',
+  'status: writing html like it is 2003, on purpose',
+  'feeling: a small website, built anyway',
+  'watching the visit counter like it is the stock market',
+  'currently: yes, this is the whole hobby',
+  'planning a page about teapots, obviously'
+];
+
+function statusWidget() {
   const bubble = $('#status-bubble');
   const btn = $('#status-btn');
-  const countEl = $('#status-count');
+  const meters = $$('.meter i');
+  const label = $('.status-text');
   if (!bubble) return;
 
-  let moodIndex = Math.floor(Math.random() * MOODS.length);
-  let pokes = store.get('nova.pokes', 0);
+  let index = Math.floor(Math.random() * MOODS.length);
 
-  const show = (text) => {
-    bubble.textContent = text;
+  const show = (i) => {
+    bubble.textContent = MOODS[i];
     bubble.classList.remove('is-new');
-    void bubble.offsetWidth;      // restart the pop animation
+    void bubble.offsetWidth;
     bubble.classList.add('is-new');
   };
 
+  const rerollMeters = () => {
+    if (rerollMeters.disabled) return;
+    meters.forEach((bar) => {
+      const value = 30 + Math.floor(Math.random() * 70);
+      bar.style.width = `${value}%`;
+      bar.closest('.meter')?.setAttribute('aria-label', `${Math.round(value / 20)} out of 5`);
+    });
+  };
+
+  show(index);
+
+  if (btn) {
+    btn.addEventListener('click', () => {
+      index = (index + 1) % MOODS.length;
+      show(index);
+      rerollMeters();
+    });
+  }
+
+  if (label) {
+    window.setInterval(() => {
+      if (!document.hidden) {
+        index = (index + 1) % MOODS.length;
+        show(index);
+      }
+    }, 9000);
+  }
+}
+
+/* 5. CURRENTLY PLAYING --------------------------------------------------- */
+const PLAYLIST = [
+  ['01. shortwave lullaby', 'the kettle choir'],
+  ['02. plaid blanket waltz', 'modem & the biscuits'],
+  ['03. strawberry static', 'cassette ghost'],
+  ['04. waiting for the cake to rise', 'the slow ovens'],
+  ['05. page under construction', 'dial tone dream'],
+  ['06. two cats on one keyboard', 'the interrupters'],
+  ['07. tea at three in the morning', 'insomnia fm'],
+  ['08. goodbye, guestbook stranger', 'the nice strangers']
+];
+
+function player() {
+  const title = $('#track-title');
+  const playBtn = $('#play-btn');
+  const nextBtn = $('#shuffle-btn');
+  if (!title) return;
+
+  let index = 0;
   const render = () => {
-    bubble.textContent = MOODS[moodIndex];
-    if (countEl) countEl.textContent = `${pokes} poke${pokes === 1 ? '' : 's'}`;
+    const [name, artist] = PLAYLIST[index];
+    title.textContent = `${name} — ${artist}`;
   };
 
   render();
 
-  if (btn) {
-    btn.addEventListener('click', () => {
-      moodIndex = (moodIndex + 1) % MOODS.length;
-      pokes += 1;
-      store.set('nova.pokes', pokes);
-      show(MOODS[moodIndex]);
-      if (countEl) countEl.textContent = `${pokes} poke${pokes === 1 ? '' : 's'}`;
+  if (playBtn) {
+    playBtn.addEventListener('click', () => {
+      const playing = document.body.classList.toggle('is-playing');
+      playBtn.setAttribute('aria-pressed', String(playing));
+      playBtn.lastChild.textContent = playing ? 'PAUSE' : 'PLAY';
     });
   }
 
-  // drift on its own too, but never while the tab is hidden
-  window.setInterval(() => {
-    if (!document.hidden) {
-      moodIndex = (moodIndex + 1) % MOODS.length;
-      show(MOODS[moodIndex]);
-    }
-  }, 7000);
-}
-
-/* 5. FAKE MUSIC PLAYER ---------------------------------------------------- */
-const PLAYLIST = [
-  '01. dial-up dreams (midnight modem mix)',
-  '02. scanlines over the parking lot',
-  '03. floppy disk heartbeat',
-  '04. waiting for the page to load (extended cut)',
-  '05. neon on wet asphalt',
-  '06. the CD spins forever',
-  '07. goodbye, guestbook stranger',
-  '08. reboot me at 3am'
-];
-
-function musicPlayer() {
-  const playBtn = $('#play-btn');
-  const shuffleBtn = $('#shuffle-btn');
-  const titleEl = $('#track-title');
-  const artistEl = $('.player-artist');
-  if (!playBtn || !titleEl) return;
-
-  const ARTISTS = ['THE DEAD PIXELS', 'SYSOP & THE CARRIER TONES', 'ISDN DREAMS', 'MODEM CHOIR'];
-  let index = 0;
-
-  const renderTrack = () => {
-    titleEl.textContent = PLAYLIST[index];
-    if (artistEl) artistEl.textContent = `${ARTISTS[index % ARTISTS.length]} · 1998`;
-  };
-
-  renderTrack();
-
-  playBtn.addEventListener('click', () => {
-    const playing = document.body.classList.toggle('is-playing');
-    playBtn.textContent = playing ? 'Pause' : 'Play';
-    playBtn.setAttribute('aria-pressed', String(playing));
-  });
-
-  if (shuffleBtn) {
-    shuffleBtn.addEventListener('click', () => {
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
       let next = index;
       while (next === index && PLAYLIST.length > 1) {
         next = Math.floor(Math.random() * PLAYLIST.length);
       }
       index = next;
-      renderTrack();
+      render();
     });
   }
 }
 
-/* 6. GUESTBOOK (localStorage) -------------------------------------------- */
-const GB_KEY = 'nova.guestbook';
-const NAME_KEY = 'nova.guestbook.name';
+/* 6. COLOUR PALETTE ------------------------------------------------------ */
+function palette() {
+  const list = $('#palette');
+  const name = $('#palette-name');
+  if (!list || !name) return;
+
+  const defaultText = name.textContent;
+
+  $$('li', list).forEach((swatch) => {
+    swatch.setAttribute('tabindex', '0');
+    swatch.setAttribute('role', 'button');
+    const value = swatch.dataset.hex || '';
+    const label = swatch.dataset.name || 'colour';
+    swatch.setAttribute('aria-label', `${label} ${value} — copy the hex code`);
+
+    const describe = () => {
+      name.textContent = value ? `${label} · ${value}` : label;
+    };
+    const reset = () => { name.textContent = defaultText; };
+
+    const copy = () => {
+      if (!value || !navigator.clipboard) {
+        name.textContent = value ? `${label} · ${value}` : label;
+        return;
+      }
+      navigator.clipboard.writeText(value).then(
+        () => { name.textContent = `copied ${value} — paste it somewhere nice`; },
+        () => { /* clipboard refused; the hex stays on screen anyway */ }
+      );
+    };
+
+    swatch.addEventListener('mouseenter', describe);
+    swatch.addEventListener('focus', describe);
+    swatch.addEventListener('mouseleave', reset);
+    swatch.addEventListener('blur', reset);
+    swatch.addEventListener('click', copy);
+    swatch.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        copy();
+      }
+    });
+  });
+}
+
+/* 7. TO-DO LIST ---------------------------------------------------------- */
+function todoList() {
+  const items = $$('.checklist li');
+  if (!items.length) return;
+
+  items.forEach((item) => {
+    item.setAttribute('tabindex', '0');
+    item.setAttribute('role', 'checkbox');
+
+    const img = $('img', item);
+    const text = item.textContent.trim().replace(/\s+/g, ' ');
+    let done = img ? /done/i.test(img.alt) : false;
+
+    const sync = () => {
+      item.setAttribute('aria-checked', String(done));
+      if (img) {
+        img.src = done ? 'assets/icons/check.png' : 'assets/icons/pin.png';
+        img.alt = done ? 'done' : 'todo';
+      }
+    };
+
+    const toggle = () => {
+      const label = item.lastChild;
+      if (!label) return;
+      const replacement = document.createElement(done ? 'span' : 's');
+      replacement.textContent = label.textContent;
+      item.replaceChild(replacement, label);
+      done = !done;
+      sync();
+    };
+
+    // ignore clicks on links inside an item (the 404 page has them) so
+    // following a link doesn't also tick the item off
+    item.addEventListener('click', (event) => {
+      if (event.target instanceof window.Element && event.target.closest('a')) return;
+      toggle();
+    });
+    item.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        toggle();
+      }
+    });
+    item.setAttribute('aria-label', `${text} — tick off`);
+    sync();
+  });
+}
+
+/* 8. CAT OF THE DAY ------------------------------------------------------ */
+const CAT_LINES = [
+  'the cat is asleep. leave a message.',
+  'she has moved 4cm in three hours. impressive.',
+  'the cat is on the keyboard. the page can wait.',
+  'she says hi, then bites the cursor.',
+  'the cat has claimed the blanket. it is hers now.',
+  'the cat watched me build this entire page. no feedback.'
+];
+
+function catOfTheDay() {
+  const note = $('#cat-note');
+  const btn = $('#cat-btn');
+  if (!note) return;
+
+  let index = 0;
+  if (btn) {
+    btn.addEventListener('click', () => {
+      index = (index + 1) % CAT_LINES.length;
+      note.textContent = CAT_LINES[index];
+      btn.lastChild.textContent = index === 0 ? 'WAKE HER' : 'AGAIN';
+    });
+  }
+}
+
+/* 9. GUESTBOOK (localStorage) ------------------------------------------- */
+const GB_KEY = 'neapolitan.guestbook';
+const NAME_KEY = 'neapolitan.guestbook.name';
 const MAX_LEN = 280;
 
 const SEED_ENTRIES = [
   {
-    name: 'pixelwitch',
-    msg: 'found this through a webring at 1am. the floppy disk piece is going straight in my bookmarks folder.',
-    ts: Date.now() - 1000 * 60 * 60 * 26
+    name: 'cakecrumb',
+    msg: 'found you through a webring at 1am. the plaid wallpaper is doing a lot and i respect it.',
+    ts: Date.now() - 1000 * 60 * 60 * 27
   },
   {
-    name: 'socket_error',
-    msg: 'your marquee scrolls at exactly the right speed, which is a science nobody respects. signed.',
-    ts: Date.now() - 1000 * 60 * 60 * 5
+    name: 'sleepycat',
+    msg: 'the cat photo made me put my tea down and stare out the window for ten minutes. ten out of ten.',
+    ts: Date.now() - 1000 * 60 * 60 * 6
   },
   {
-    name: 'dial_up_dad',
-    msg: 'came for the hit counter, stayed for the cat astronaut. tell me when the webring opens.',
-    ts: Date.now() - 1000 * 60 * 47
+    name: 'warm_signal',
+    msg: 'do you take recipe requests? asking for a friend who is me.',
+    ts: Date.now() - 1000 * 60 * 52
   }
 ];
 
@@ -287,7 +480,6 @@ function guestbook() {
     status.classList.toggle('is-error', Boolean(isError));
   };
 
-  // remember a returning visitor's handle
   const savedName = store.get(NAME_KEY, '');
   if (nameInput && savedName) nameInput.value = savedName;
 
@@ -304,7 +496,7 @@ function guestbook() {
     const msg = (msgInput?.value || '').trim();
 
     if (!name || !msg) {
-      setStatus('Both fields, please — I want to know who to thank.', true);
+      setStatus('Both boxes, please — I want to know who to thank.', true);
       (!name ? nameInput : msgInput)?.focus();
       return;
     }
@@ -313,7 +505,7 @@ function guestbook() {
 
     if (store.set(GB_KEY, entries)) {
       store.set(NAME_KEY, name.slice(0, 24));
-      setStatus(`Signed. Thanks, ${name.slice(0, 24)} — your note is saved in this browser.`);
+      setStatus(`Signed. Thank you, ${name.slice(0, 24)} — your note is saved in this browser.`);
     } else {
       setStatus('Your browser blocked storage, so the note was shown but not kept.', true);
     }
@@ -327,23 +519,23 @@ function guestbook() {
   render();
 }
 
-/* 7. HIT COUNTER ---------------------------------------------------------- */
-/* Honest disclosure: this counts visits in *your* browser only, because a
-   static host has no server to count them for you. That's the joke, and the
-   whole charm, of a Nineties hit counter. */
-function hitCounter() {
+/* 10. VISIT COUNTER ------------------------------------------------------ */
+/* Honest disclosure: a static host has no server to count visits for you, so
+   this counts visits in your own browser. That is the joke and the charm of a
+   Nineties hit counter, so it is labelled as such on the page. */
+function visitCounter() {
   const el = $('#hits');
   if (!el) return;
 
-  const visits = Number(store.get('nova.hits', 0)) + 1;
-  store.set('nova.hits', visits);
+  const visits = Number(store.get('neapolitan.hits', 0)) + 1;
+  store.set('neapolitan.hits', visits);
 
-  const digits = String(visits).padStart(7, '0').split('');
+  const digits = String(Math.min(visits, 999999)).padStart(6, '0').split('');
   el.innerHTML = digits.map((d) => `<i>${d}</i>`).join('');
   el.setAttribute('aria-label', `${visits} visit${visits === 1 ? '' : 's'} recorded in this browser`);
 }
 
-/* 8. SCROLL REVEAL -------------------------------------------------------- */
+/* 11. SCROLL REVEAL ------------------------------------------------------ */
 function scrollReveal() {
   const targets = $$('.reveal');
   if (!targets.length) return;
@@ -360,98 +552,49 @@ function scrollReveal() {
         observer.unobserve(entry.target);
       }
     });
-  }, { rootMargin: '0px 0px -8% 0px', threshold: 0.06 });
+  }, { rootMargin: '0px 0px -6% 0px', threshold: 0.05 });
 
   targets.forEach((el) => observer.observe(el));
 }
 
-/* 9. STICKY-NAV HIGHLIGHTING --------------------------------------------- */
-function activeNav() {
-  const links = $$('.nav-list a[href^="#"]');
-  if (!links.length || !('IntersectionObserver' in window)) return;
+/* 12. CONFETTI ----------------------------------------------------------- */
+/* Click the station name for a shower of little pink squares. */
+function confetti() {
+  const trigger = $('.logo');
+  if (!trigger) return;
 
-  const byId = new Map(links.map((a) => [a.getAttribute('href').slice(1), a]));
+  trigger.style.cursor = 'pointer';
+  trigger.title = 'click me';
 
-  const observer = new IntersectionObserver((batch) => {
-    batch.forEach((entry) => {
-      if (entry.isIntersecting) {
-        links.forEach((a) => a.removeAttribute('aria-current'));
-        const link = byId.get(entry.target.id);
-        if (link) link.setAttribute('aria-current', 'true');
-      }
-    });
-  }, { rootMargin: '-45% 0px -50% 0px' });
+  trigger.addEventListener('click', () => {
+    const rect = trigger.getBoundingClientRect();
+    const colours = ['#e2aab2', '#c886a0', '#6c4028', '#f2cfd4', '#f7e9d7'];
 
-  byId.forEach((_, id) => {
-    const section = document.getElementById(id);
-    if (section) observer.observe(section);
-  });
-}
+    for (let i = 0; i < 24; i += 1) {
+      const bit = document.createElement('i');
+      bit.setAttribute('aria-hidden', 'true');
+      const size = 5 + Math.random() * 7;
+      bit.style.cssText = `position:fixed;z-index:9999;pointer-events:none;
+        width:${size}px;height:${size}px;
+        left:${rect.left + Math.random() * rect.width}px;
+        top:${rect.top + rect.height / 2}px;
+        background:${colours[i % colours.length]};
+        border:1px solid #351e10;`;
+      document.body.appendChild(bit);
 
-/* 10. EASTER EGGS --------------------------------------------------------- */
-function easterEggs() {
-  const avatar = $('.hero-avatar');
-
-  // click the cat: shower of pixels
-  if (avatar) {
-    avatar.style.cursor = 'pointer';
-    avatar.addEventListener('click', () => {
-      const rect = avatar.getBoundingClientRect();
-      const colours = ['#ff4fd8', '#53f2ff', '#ffe066', '#a678ff', '#7bffb2'];
-
-      for (let i = 0; i < 26; i += 1) {
-        const bit = document.createElement('i');
-        bit.setAttribute('aria-hidden', 'true');
-        const size = 4 + Math.random() * 6;
-        bit.style.cssText = `position:fixed;z-index:9999;pointer-events:none;
-          width:${size}px;height:${size}px;
-          left:${rect.left + Math.random() * rect.width}px;
-          top:${rect.top + rect.height / 2}px;
-          background:${colours[i % colours.length]};`;
-        document.body.appendChild(bit);
-
-        // Web Animations API: every current browser has it, but don't leave
-        // stray pixels behind if it is missing.
-        if (typeof bit.animate === 'function') {
-          bit.animate(
-            [
-              { transform: 'translate(0,0) rotate(0deg)', opacity: 1 },
-              {
-                transform: `translate(${(Math.random() - 0.5) * 260}px, ${80 + Math.random() * 190}px) rotate(${Math.random() * 540 - 270}deg)`,
-                opacity: 0
-              }
-            ],
-            { duration: 900 + Math.random() * 700, easing: 'steps(9, end)' }
-          ).onfinish = () => bit.remove();
-        } else {
-          window.setTimeout(() => bit.remove(), 1200);
-        }
-      }
-    });
-  }
-
-  // konami code (↑↑↓↓←→←→) turns the whole site into party mode
-  const CODE = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight'];
-  const bubble = $('#status-bubble');
-  let progress = 0;
-
-  document.addEventListener('keydown', (event) => {
-    // event.target can be the document itself, which has no closest()
-    const target = event.target;
-    if (target instanceof Element && target.closest('input, textarea')) return;
-
-    progress = event.key === CODE[progress] ? progress + 1 : (event.key === CODE[0] ? 1 : 0);
-
-    if (progress === CODE.length) {
-      progress = 0;
-      const on = document.body.classList.toggle('party');
-      if (bubble) {
-        bubble.textContent = on
-          ? 'PARTY MODE: ON — press ↑↑↓↓←→←→ again to switch it off'
-          : 'party mode off. back to the usual neon hum.';
-        bubble.classList.remove('is-new');
-        void bubble.offsetWidth;
-        bubble.classList.add('is-new');
+      if (typeof bit.animate === 'function') {
+        bit.animate(
+          [
+            { transform: 'translate(0,0) rotate(0deg)', opacity: 1 },
+            {
+              transform: `translate(${(Math.random() - 0.5) * 240}px, ${70 + Math.random() * 170}px) rotate(${Math.random() * 480 - 240}deg)`,
+              opacity: 0
+            }
+          ],
+          { duration: 900 + Math.random() * 600, easing: 'steps(8, end)' }
+        ).onfinish = () => bit.remove();
+      } else {
+        window.setTimeout(() => bit.remove(), 1200);
       }
     }
   });
