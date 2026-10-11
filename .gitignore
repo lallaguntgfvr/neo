@@ -1,0 +1,14 @@
+# staging folder used by .github/workflows/deploy-neocities.yml
+_site/
+
+# only needed for the local smoke test (npm install --no-save jsdom)
+node_modules/
+package.json
+package-lock.json
+
+# editor + OS noise
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/

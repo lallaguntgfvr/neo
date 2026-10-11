@@ -1,1 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEAPOLITAN STATION // a cozy little homepage</title>
+<meta name="description" content="NEAPOLITAN STATION — a hand-coded personal homepage on Neocities. Plaid wallpaper, strawberry cake, cats, and a guestbook you can actually sign.">
+<meta name="author" content="lallaguntgfvr">
+<meta name="keywords" content="neocities, personal site, pastel, plaid, web revival, guestbook, pixel art">
+<meta name="theme-color" content="#4a2c1a">
 
+<meta property="og:type" content="website">
+<meta property="og:title" content="NEAPOLITAN STATION">
+<meta property="og:description" content="A cozy hand-coded corner of the small web.">
+<meta property="og:image" content="assets/photo-cake.jpg">
+
+<!-- favicon: a little neapolitan heart, inline so it costs no request -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23f2cfd4'/%3E%3Cpath d='M8 13.5C8 13.5 2.5 9.6 2.5 6.2 2.5 4.2 4 3 5.7 3c1.1 0 1.9.6 2.3 1.3C8.4 3.6 9.2 3 10.3 3 12 3 13.5 4.2 13.5 6.2c0 3.4-5.5 7.3-5.5 7.3z' fill='%236c3f28'/%3E%3C/svg%3E">
+
+<link rel="stylesheet" href="style.css">
+
+<!-- tells the stylesheet JavaScript is available, so animated widgets keep
+     their starting state instead of being stuck invisible without it -->
+<script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+<a class="skip-link" href="#main">skip to content</a>
+
+<!-- =====================================================================
+     TOP STRIP — the little cream bar with the nav links
+     ===================================================================== -->
+<div class="topbar">
+  <div class="page">
+    <div class="topbar-inner">
+      <nav class="topnav" aria-label="Main">
+        <ul>
+          <li><a href="#top"><img src="assets/icons/home.png" width="16" height="16" alt="" aria-hidden="true">home</a></li>
+          <li><a href="#about"><img src="assets/icons/cat.png" width="16" height="16" alt="" aria-hidden="true">about</a></li>
+          <li><a href="#gallery"><img src="assets/icons/palette.png" width="16" height="16" alt="" aria-hidden="true">gallery</a></li>
+          <li><a href="#recipes"><img src="assets/icons/cup.png" width="16" height="16" alt="" aria-hidden="true">recipes</a></li>
+          <li><a href="#guestbook"><img src="assets/icons/envelope.png" width="16" height="16" alt="" aria-hidden="true">guestbook</a></li>
+          <li><a href="#links"><img src="assets/icons/star.png" width="16" height="16" alt="" aria-hidden="true">links</a></li>
+        </ul>
+      </nav>
+      <p class="topbar-tag">&#9670; hand-coded since 2026 &#9670; no trackers, no cookies &#9670;</p>
+    </div>
+  </div>
+</div>
+
+<div class="site" id="top">
+  <div class="page">
+    <!-- the whole station sits on one big cream shell with a brown border,
+         with the widget panels nested inside it -->
+    <div class="shell">
+
+    <!-- =================================================================
+         HEADER PANEL — NEAPOLITAN STATION
+         ================================================================= -->
+    <header class="panel masthead">
+      <p class="strip"><span class="strip-text">&#9834; a cozy little homepage, still under construction &#9834;</span></p>
+
+      <div class="masthead-body">
+        <p class="kicker">est. 2026 &middot; 100% hand-made &middot; best viewed with a snack</p>
+        <h1 class="logo">NEAPOLITAN STATION</h1>
+        <p class="subtitle">a personal homepage about pink things, warm drinks, and web pages that took all night</p>
+
+        <div class="stamp-row">
+          <span class="stamp"><img src="assets/icons/heart.png" width="16" height="16" alt="" aria-hidden="true"> updated 10 oct 2026</span>
+          <span class="stamp"><img src="assets/icons/star.png" width="16" height="16" alt="" aria-hidden="true"> sign the guestbook</span>
+          <span class="stamp"><img src="assets/icons/check.png" width="16" height="16" alt="" aria-hidden="true"> zero trackers</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- =================================================================
+         THREE COLUMNS — widgets / main content / widgets
+         ================================================================= -->
+    <div class="columns">
+
+      <!-- ============ LEFT SIDEBAR ============ -->
+      <aside class="col-left" aria-label="Sidebar widgets">
+
+        <!-- station time -->
+        <section class="panel">
+          <h2 class="bar bar-icon"><img src="assets/icons/clock.png" width="16" height="16" alt="" aria-hidden="true"><span>STATION TIME</span></h2>
+          <div class="body">
+            <div class="clock-block">
+              <span class="clock-time" id="clock">--:--:--</span>
+              <span class="clock-date" id="clock-date">loading…</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- mini calendar -->
+        <section class="panel">
+          <h2 class="bar bar-icon"><img src="assets/icons/calendar.png" width="16" height="16" alt="" aria-hidden="true"><span>CALENDAR</span></h2>
+          <div class="body">
+            <div class="mini-calendar">
+              <p class="cal-head"><span id="cal-month">—</span></p>
+              <table class="cal-grid" aria-hidden="false">
+                <thead>
+                  <tr><th scope="col">S</th><th scope="col">M</th><th scope="col">T</th><th scope="col">W</th><th scope="col">T</th><th scope="col">F</th><th scope="col">S</th></tr>
+                </thead>
+                <tbody id="cal-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- nav butts -->
+        <section class="panel">
+          <h2 class="bar bar-icon"><img src="assets/icons/arrow.png" width="16" height="16" alt="" aria-hidden="true"><span>NAVIGATE</span></h2>
+          <div class="body">
+            <ul class="butt-list">
+              <li><a class="butt" href="#about"><img src="assets/icons/pencil.png" width="16" height="16" alt="" aria-hidden="true">READ MY ABOUT</a></li>
+              <li><a class="butt butt-pink" href="#gallery"><img src="assets/icons/palette.png" width="16" height="16" alt="" aria-hidden="true">SEE THE GALLERY</a></li>
+              <li><a class="butt" href="#recipes"><img src="assets/icons/cup.png" width="16" height="16" alt="" aria-hidden="true">CAKE RECIPES</a></li>
+              <li><a class="butt butt-pink" href="#guestbook"><img src="assets/icons/envelope.png" width="16" height="16" alt="" aria-hidden="true">SIGN THE BOOK</a></li>
+              <li><a class="butt" href="#links"><img src="assets/icons/star.png" width="16" height="16" alt="" aria-hidden="true">FRIEND LINKS</a></li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- current status -->
+        <section class="panel">
+          <h2 class="bar bar-icon"><img src="assets/icons/heart.png" width="16" height="16" alt="" aria-hidden="true"><span>CURRENT STATUS</span></h2>
+          <div class="body">
+            <p class="status-text" id="status-bubble" aria-live="polite">loading a feeling&hellip;</p>
+            <ul class="meter-list">
+              <li><span class="meter-label">coffee</span><span class="meter" role="img" aria-label="4 out of 5"><i class="mw-80"></i></span></li>
+              <li><span class="meter-label">wifi</span><span class="meter" role="img" aria-label="3 out of 5"><i class="mw-60"></i></span></li>
+              <li><span class="meter-label">pixels</span><span class="meter" role="img" aria-label="5 out of 5"><i class="mw-100"></i></span></li>
+            </ul>
+            <button class="butt butt-small" id="status-btn" type="button"><img src="assets/icons/heart.png" width="16" height="16" alt="" aria-hidden="true">POKE IT</button>
+          </div>
+        </section>
+
+        <!-- to do -->
+        <section class="panel">
+          <h2 class="bar bar-icon"><img src="assets/icons/pencil.png" width="16" height="16" alt="" aria-hidden="true"><span>TO&nbsp;DO</span></h2>
+          <div class="body">
+            <ul class="checklist">
+              <li><img src="assets/icons/check.png" width="16" height="16" alt="done" aria-hidden="true"><s>pick a colour scheme</s></li>
+              <li><img src="assets/icons/check.png" width="16" height="16" alt="done" aria-hidden="true"><s>draw a wallpaper</s></li>
+              <li><img src="assets/icons/pin.png" width="16" height="16" alt="todo" aria-hidden="true">add a webring page</li>
+              <li><img src="assets/icons/pin.png" width="16" height="16" alt="todo" aria-hidden="true">scan the old photos</li>
+              <li><img src="assets/icons/pin.png" width="16" height="16" alt="todo" aria-hidden="true">stop editing at 3am</li>
+            </ul>
+            <p class="tiny">hover an item to tick it off, like a fridge list</p>
+          </div>
+        </section>
+
+      </aside>
+
+      <!-- ============ MAIN COLUMN ============ -->
+      <main class="col-main" id="main">
+
+        <!-- live transmission strip -->
+        <div class="transmission">
+          <span class="tx-label">LIVE TRANSMISSION</span>
+          <span class="tx-text" id="transmission">baking something pink, back in a minute&hellip;</span>
+          <button class="butt butt-small" id="tx-btn" type="button"><img src="assets/icons/arrow.png" width="16" height="16" alt="" aria-hidden="true">NEXT</button>
+        </div>
+
+        <!-- welcome -->
+        <section class="panel">
+          <h2 class="bar"><span>WELCOME TO NEAPOLITAN STATION</span></h2>
+          <div class="body">
+            <div class="welcome">
+              <figure class="welcome-photo">
+                <img src="assets/photo-cat.jpg" width="240" height="240"
+                     alt="A grey tabby cat asleep on a dusty pink knitted blanket.">
+                <figcaption>me, most evenings</figcaption>
+              </figure>
+              <div class="welcome-text">
+                <p class="lede">Hi. You found the page I built instead of going to bed.</p>
+                <p>
+                  NEAPOLITAN STATION is a small pink-and-chocolate corner of
+                  <a href="https://neocities.org" target="_blank" rel="noopener noreferrer">Neocities</a>
+                  where I keep the things I like: soft colours, old cameras, warm drinks, cats that
+                  sleep on my keyboard, and web pages that somebody wrote out by hand instead of
+                  generating.
+                </p>
+                <p>
+                  Everything here is written in a text editor — no build step, no framework, no
+                  cookie banner, no machine deciding what you look at next. There's a guestbook,
+                  a shelf of recipes, and a links page full of places I actually visit.
+                </p>
+                <p class="tiny">
+                  View source all you like. It's commented, unminified, and yours to learn from.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- about -->
+        <section class="panel" id="about">
+          <h2 class="bar bar-icon"><img src="assets/icons/cat.png" width="16" height="16" alt="" aria-hidden="true"><span>ABOUT ME</span></h2>
+          <div class="body">
+            <div class="about-grid">
+              <div>
+                <p>
+                  I'm <strong>lallaguntgfvr</strong> — Lalla is fine, or whatever nickname you
+                  feel like typing. I make things in pink, I keep a notebook of website ideas
+                  I'll never get to, and I think a homepage should be somewhere you can visit
+                  rather than something you scroll past.
+                </p>
+                <p>
+                  I learned HTML by viewing source on other people's Neocities pages, which is
+                  exactly the right way to learn it. If that's what you're doing right now:
+                  hello, keep going, nobody is grading you.
+                </p>
+              </div>
+              <dl class="facts">
+                <dt>building with</dt><dd>a text editor and one CSS file</dd>
+                <dt>favourite colour</dt><dd><span class="swatch sw-dusty" aria-hidden="true"></span>dusty pink</dd>
+                <dt>favourite drink</dt><dd>strawberry milkshake, extra thick</dd>
+                <dt>hobby count</dt><dd>seven, all of them half-finished</dd>
+                <dt>guestbook policy</dt><dd>everyone welcome, be kind</dd>
+              </dl>
+            </div>
+          </div>
+        </section>
+
+        <!-- action log: latest entries + favourite recipes -->
+        <section class="panel" id="recipes">
+          <h2 class="bar bar-icon"><img src="assets/icons/cup.png" width="16" height="16" alt="" aria-hidden="true"><span>LATEST ENTRIES &amp; FAVOURITE RECIPES</span></h2>
+          <div class="body">
+            <div class="cards">
+              <article class="card">
+                <img class="card-img" src="assets/photo-cake.jpg" width="240" height="240"
+                     alt="A slice of strawberry layer cake on a cream plate.">
+                <h3>strawberry layer cake</h3>
+                <p>Three layers, too much cream, worth every minute. The one I make when somebody is coming over.</p>
+                <a class="butt butt-small" href="#recipes"><img src="assets/icons/cup.png" width="16" height="16" alt="" aria-hidden="true">READ IT</a>
+              </article>
+
+              <article class="card">
+                <img class="card-img" src="assets/photo-shake.jpg" width="240" height="240"
+                     alt="A strawberry milkshake in a tall glass with a striped straw.">
+                <h3>strawberry shake</h3>
+                <p>Frozen strawberries, cold milk, a spoon of vanilla, and a blender you have to hold down.</p>
+                <a class="butt butt-small" href="#recipes"><img src="assets/icons/music.png" width="16" height="16" alt="" aria-hidden="true">READ IT</a>
+              </article>
+
+              <article class="card">
+                <img class="card-img" src="assets/photo-desk.jpg" width="240" height="240"
+                     alt="A cozy desk with a big vintage keyboard, notebooks and a film camera.">
+                <h3>the desk tour</h3>
+                <p>Where the pages get made: one loud keyboard, two notebooks, and a camera that never has film.</p>
+                <a class="butt butt-small" href="#gallery"><img src="assets/icons/palette.png" width="16" height="16" alt="" aria-hidden="true">HAVE A LOOK</a>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <!-- gallery -->
+        <section class="panel" id="gallery">
+          <h2 class="bar bar-icon"><img src="assets/icons/palette.png" width="16" height="16" alt="" aria-hidden="true"><span>PHOTO GALLERY</span></h2>
+          <div class="body">
+            <p class="tiny">Four from the shoebox. Click any of them to see it full size.</p>
+            <div class="gallery">
+              <figure>
+                <a href="assets/photo-cat.jpg"><img src="assets/photo-cat.jpg" width="240" height="240" loading="lazy"
+                     alt="A grey tabby cat asleep on a dusty pink knitted blanket."></a>
+                <figcaption>nap number four</figcaption>
+              </figure>
+              <figure>
+                <a href="assets/photo-cake.jpg"><img src="assets/photo-cake.jpg" width="240" height="240" loading="lazy"
+                     alt="A slice of strawberry layer cake with chocolate drizzle."></a>
+                <figcaption>cake, again</figcaption>
+              </figure>
+              <figure>
+                <a href="assets/photo-shake.jpg"><img src="assets/photo-shake.jpg" width="240" height="240" loading="lazy"
+                     alt="A strawberry milkshake with a striped paper straw."></a>
+                <figcaption>shake o'clock</figcaption>
+              </figure>
+              <figure>
+                <a href="assets/photo-desk.jpg"><img src="assets/photo-desk.jpg" width="240" height="240" loading="lazy"
+                     alt="A desk with a vintage keyboard, notebooks and a film camera."></a>
+                <figcaption>the desk</figcaption>
+              </figure>
+            </div>
+          </div>
+        </section>
+
+        <!-- guestbook -->
+        <section class="panel" id="guestbook">
+          <h2 class="bar bar-icon"><img src="assets/icons/envelope.png" width="16" height="16" alt="" aria-hidden="true"><span>GUESTBOOK</span></h2>
+          <div class="body">
+            <p>
+              Leave a note. Entries are saved in <em>your</em> browser with
+              <code>localStorage</code> — no server, no database, nobody's inbox. Your words
+              stay on your machine and the page remembers you tomorrow.
+            </p>
+
+            <noscript>
+              <p class="note">JavaScript is switched off, so the guestbook can't save. Everything else on this page still works.</p>
+            </noscript>
+
+            <form class="gb-form" id="gb-form" novalidate>
+              <div class="field">
+                <label for="gb-name">your name or handle</label>
+                <input id="gb-name" name="name" type="text" maxlength="24" autocomplete="nickname"
+                       placeholder="cakecrumb, sleepycat, a passing stranger&hellip;" required>
+              </div>
+              <div class="field">
+                <label for="gb-msg">your message</label>
+                <textarea id="gb-msg" name="msg" maxlength="280"
+                          placeholder="Say hello, recommend a recipe, tell me a link is broken&hellip;" required></textarea>
+              </div>
+              <div class="form-foot">
+                <button class="butt" type="submit"><img src="assets/icons/heart.png" width="16" height="16" alt="" aria-hidden="true">SIGN IT</button>
+                <span class="counter" id="gb-counter">0 / 280</span>
+              </div>
+              <p class="form-status" id="gb-status" role="status" aria-live="polite"></p>
+            </form>
+
+            <div class="dots" role="presentation"></div>
+
+            <h3 class="sub-head">signatures <span class="muted" id="gb-total">(0)</span></h3>
+            <ul class="gb-list" id="gb-list"></ul>
+          </div>
+        </section>
+
+        <!-- links -->
+        <section class="panel" id="links">
+          <h2 class="bar bar-icon"><img src="assets/icons/star.png" width="16" height="16" alt="" aria-hidden="true"><span>LINKS &amp; FRIENDS</span></h2>
+          <div class="body">
+            <div class="webring">
+              <p class="webring-title">&#9670; THE PINK HOUR WEBRING &#9670; &middot; site 14 of 61</p>
+              <div class="webring-buttons">
+                <a class="butt butt-small" href="#links">&larr; PREV</a>
+                <a class="butt butt-small butt-pink" href="#links">RANDOM</a>
+                <a class="butt butt-small" href="#links">NEXT &rarr;</a>
+              </div>
+            </div>
+
+            <h3 class="sub-head">places I actually read</h3>
+            <ul class="link-list">
+              <li>
+                <a href="https://neocities.org/browse" target="_blank" rel="noopener noreferrer">
+                  <img src="assets/icons/home.png" width="16" height="16" alt="" aria-hidden="true">
+                  <span><strong>Neocities Browse</strong><em>the neighbourhood. click anything.</em></span>
+                </a>
+              </li>
+              <li>
+                <a href="https://wiby.me" target="_blank" rel="noopener noreferrer">
+                  <img src="assets/icons/star.png" width="16" height="16" alt="" aria-hidden="true">
+                  <span><strong>Wiby</strong><em>a search engine for pages like this one.</em></span>
+                </a>
+              </li>
+              <li>
+                <a href="https://sadgrl.online/learn" target="_blank" rel="noopener noreferrer">
+                  <img src="assets/icons/pencil.png" width="16" height="16" alt="" aria-hidden="true">
+                  <span><strong>Sadgrl's HTML guides</strong><em>how I learned to build any of this.</em></span>
+                </a>
+              </li>
+              <li>
+                <a href="https://web.archive.org" target="_blank" rel="noopener noreferrer">
+                  <img src="assets/icons/music.png" width="16" height="16" alt="" aria-hidden="true">
+                  <span><strong>Wayback Machine</strong><em>the web's attic. go rummaging.</em></span>
+                </a>
+              </li>
+            </ul>
+
+            <div class="dots" role="presentation"></div>
+
+            <h3 class="sub-head">take my button</h3>
+            <p>88&times;31, like the old days. Copy this onto your own links page and I'll link back.</p>
+            <p class="button-preview">
+              <img src="assets/button-neapolitan.png" width="88" height="31"
+                   alt="NEAPOLITAN STATION button: pink hearts and the site name on a chocolate background.">
+              <span class="muted">the button itself, all 88 by 31 pixels of it</span>
+            </p>
+<pre class="codesnip"><code>&lt;a href="https://YOUR-NAME.neocities.org"&gt;
+  &lt;img src="https://YOUR-NAME.neocities.org/assets/button-neapolitan.png"
+       width="88" height="31" alt="NEAPOLITAN STATION"&gt;
+&lt;/a&gt;</code></pre>
+            <p class="tiny">
+              Swap <code>YOUR-NAME</code> for your own subdomain after uploading the button file.
+            </p>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- ============ RIGHT SIDEBAR ============ -->
+      <aside class="col-right" aria-label="More sidebar widgets">
+
+        <!-- colour palette -->
+        <section class="panel">
+          <h2 class="bar bar-icon"><img src="assets/icons/palette.png" width="16" height="16" alt="" aria-hidden="true"><span>COLOUR PALETTE</span></h2>
+          <div class="body">
+            <ul class="palette" id="palette">
+              <li class="sw sw-vanilla" data-hex="#f7e9d7" data-name="vanilla"></li>
+              <li class="sw sw-blush" data-hex="#f2cfd4" data-name="blush"></li>
+              <li class="sw sw-dusty-rose" data-hex="#e2aab2" data-name="dusty rose"></li>
+              <li class="sw sw-raspberry" data-hex="#c886a0" data-name="raspberry"></li>
+              <li class="sw sw-chocolate" data-hex="#6c4028" data-name="chocolate"></li>
+              <li class="sw sw-bittersweet" data-hex="#4a2c1a" data-name="bittersweet"></li>
+            </ul>
+            <p class="tiny" id="palette-name">hover a square to name it</p>
+          </div>
+        </section>
+
+        <!-- currently -->
+        <section class="panel">
+          <h2 class="bar bar-icon"><img src="assets/icons/music.png" width="16" height="16" alt="" aria-hidden="true"><span>CURRENTLY</span></h2>
+          <div class="body">
+            <p class="currently-label">listening to</p>
+            <p class="currently-item" id="track-title">01. shortwave lullaby</p>
+            <div class="eq" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span>
+            </div>
+            <div class="player-actions">
+              <button class="butt butt-small" id="play-btn" type="button" aria-pressed="false"><img src="assets/icons/music.png" width="16" height="16" alt="" aria-hidden="true">PLAY</button>
+              <button class="butt butt-small" id="shuffle-btn" type="button">NEXT</button>
+            </div>
+
+            <div class="dots" role="presentation"></div>
+
+            <p class="currently-label">reading</p>
+            <p class="currently-item">the internet archive, badly</p>
+            <p class="currently-label">eating</p>
+            <p class="currently-item">the cake in the photo</p>
+          </div>
+        </section>
+
+        <!-- plaid buttons -->
+        <section class="panel">
+          <h2 class="bar bar-icon"><img src="assets/icons/star.png" width="16" height="16" alt="" aria-hidden="true"><span>BUTTONS</span></h2>
+          <div class="body">
+            <div class="badgewall">
+              <a class="badge" href="https://neocities.org" target="_blank" rel="noopener noreferrer">NEOCITIES</a>
+              <a class="badge b-alt" href="https://wiby.me" target="_blank" rel="noopener noreferrer">WIBY.SEARCH</a>
+              <a class="badge" href="https://sadgrl.online" target="_blank" rel="noopener noreferrer">SADGRL.ONLINE</a>
+              <span class="badge b-alt">HTML &amp; CSS ONLY</span>
+              <span class="badge">BEST VIEWED ANYWHERE</span>
+              <span class="badge b-alt">MADE BY HAND</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- cat of the day -->
+        <section class="panel">
+          <h2 class="bar bar-icon"><img src="assets/icons/cat.png" width="16" height="16" alt="" aria-hidden="true"><span>CAT OF THE DAY</span></h2>
+          <div class="body cat-widget">
+            <img src="assets/icons/cat.png" width="16" height="16" alt="" aria-hidden="true" class="cat-widget-icon">
+            <p id="cat-note">the cat is asleep. leave a message.</p>
+            <button class="butt butt-small" id="cat-btn" type="button"><img src="assets/icons/pin.png" width="16" height="16" alt="" aria-hidden="true">WAKE HER</button>
+          </div>
+        </section>
+
+        <!-- traffic -->
+        <section class="panel">
+          <h2 class="bar bar-icon"><img src="assets/icons/check.png" width="16" height="16" alt="" aria-hidden="true"><span>SITE TRAFFIC</span></h2>
+          <div class="body">
+            <span class="hits-label">visits to this page</span>
+            <span class="hits" id="hits" role="img" aria-label="visit counter"><i>0</i><i>0</i><i>0</i><i>0</i><i>0</i><i>1</i></span>
+            <p class="tiny">counted in your browser, honestly, because a static site has no server to count for it</p>
+
+            <div class="dots" role="presentation"></div>
+
+            <span class="hits-label">mood</span>
+            <div class="mood-face" id="mood-face" role="img" aria-label="a calm pixel cat face">=^.^=</div>
+          </div>
+        </section>
+
+      </aside>
+    </div><!-- /.columns -->
+
+    <!-- =================================================================
+         FOOTER
+         ================================================================= -->
+    <footer class="panel footer-panel">
+      <div class="body">
+        <ul class="footer-nav">
+          <li><a href="#top">home</a></li>
+          <li><a href="#about">about</a></li>
+          <li><a href="#gallery">gallery</a></li>
+          <li><a href="#recipes">recipes</a></li>
+          <li><a href="#guestbook">guestbook</a></li>
+          <li><a href="#links">links</a></li>
+          <li><a href="404.html">404</a></li>
+        </ul>
+        <p class="footer-brand">NEAPOLITAN STATION &middot; est. 2026</p>
+        <p class="tiny">
+          Written by hand in a text editor by lallaguntgfvr. Hosted on Neocities.
+          Copy anything you like, no credit needed &mdash; credit gladly accepted.
+        </p>
+        <p class="tiny">&copy; <span id="year">2026</span> &middot; <a href="#top">back to the top &uarr;</a></p>
+      </div>
+    </footer>
+
+    </div><!-- /.shell -->
+  </div><!-- /.page -->
+</div><!-- /.site -->
+
+<script src="script.js"></script>
+</body>
+</html>
